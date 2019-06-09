@@ -9,6 +9,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.google.gson.LongSerializationPolicy;
+import com.google.gson.reflect.TypeToken;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -21,6 +22,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Reader;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -31,26 +33,25 @@ public class NoteRepository {
     public static final int ACTION_NEW_NOTE = 0;
     public static final int ACTION_UPDATE = 1;
     public static final String JSON_REPOSITORY_NAME = "noteRepository.json";
+    public static final String JSON_ARRAY = "noteRepository";
     public static final String FIELD_TITLE = "name";
     public static final String FIELD_DESCRIPTION = "description";
     public static final String FIELD_DEADLINE = "deadline";
     public static final String FIELD_CREATIONDATE = "creationDate";
     public static final String FIELD_CHANGEDATE = "changeDate";
     public static final String FIELD_IS_DEADLINE_NEEDED = "isDeadlineNeeded";
-    private ArrayList<Note> noteList = new ArrayList<Note>();
+    private List<Note> noteList = new ArrayList<Note>();
 
     public NoteRepository() {
     }
 
     public void saveNote(Context context, Note note) {
+        noteList = fillList(context);
+        noteList.add(note);
         JSONObject noteObject = new JSONObject();
         try {
-            noteObject.put(FIELD_TITLE, String.valueOf(note.getNoteTitle()));
-            noteObject.put(FIELD_DESCRIPTION, String.valueOf(note.getNoteDescription()));
-            noteObject.put(FIELD_DEADLINE, String.valueOf(note.getNoteTime()));
-            noteObject.put(FIELD_CREATIONDATE, note.getCreationDate());
-            noteObject.put(FIELD_CHANGEDATE, note.getChangeDate());
-            noteObject.put(FIELD_IS_DEADLINE_NEEDED, note.getDeadlineNeeded());
+            noteObject.put(JSON_ARRAY, noteList);
+
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -75,14 +76,15 @@ public class NoteRepository {
         Note note = new Note();
         GsonBuilder gsonBuilder = new GsonBuilder()
                 .serializeNulls()
-                .setLenient().setLongSerializationPolicy(LongSerializationPolicy.STRING)
+                .setLenient()
+                .setLongSerializationPolicy(LongSerializationPolicy.STRING)
                 .setDateFormat("yyyy-MM-dd hh:mm:ss.S");
         gson = gsonBuilder.create();
 
         if (file.exists()) {
             try (Reader reader = new FileReader(file)) {
-                note = gson.fromJson(reader, Note.class);
-                noteList.add(note);
+                Type listType = new TypeToken<ArrayList<Note>>(){}.getType();
+                noteList = new Gson().fromJson(reader, listType);
             } catch (IOException e) {
                 e.printStackTrace();
             }
