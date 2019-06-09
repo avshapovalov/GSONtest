@@ -2,7 +2,6 @@ package com.example.myapplication;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.util.JsonReader;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -12,6 +11,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.LongSerializationPolicy;
 import com.google.gson.annotations.SerializedName;
 import com.google.gson.reflect.TypeToken;
+import com.google.gson.stream.JsonReader;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -27,6 +27,7 @@ import java.io.Reader;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -52,6 +53,8 @@ public class NoteRepository {
     public void saveNote(Context context, Note note) {
         noteList = fillList(context);
         noteList.add(note);
+        noteList.add(new Note("Тест", "тест", "02.04.1990", Calendar.getInstance().getTimeInMillis(),Calendar.getInstance().getTimeInMillis(), false));
+        noteList.add(new Note("Тест2", "тест2", "20.09.2019", Calendar.getInstance().getTimeInMillis(),Calendar.getInstance().getTimeInMillis(), true));
         Type listType = new TypeToken<ArrayList<Note>>() {
         }.getType();
 
@@ -63,7 +66,6 @@ public class NoteRepository {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        Log.d("СМОТРИ СЮДА", json);
         Toast.makeText(context, "Заметка сохранена", Toast.LENGTH_SHORT).show();
     }
 
@@ -74,12 +76,11 @@ public class NoteRepository {
         Type listType = new TypeToken<List<Note>>() {
         }.getType();
         if (file.exists()) {
-            Log.d("СМОТРИ СЮДА", "Файл есть");
             try {
-                Reader reader = new FileReader(file);
-                Note[] notes = gson.fromJson(reader, listType);
+                FileReader fileReader = new FileReader(file);
+                JsonReader jsonReader = new JsonReader(fileReader);
+                Note[] notes = gson.fromJson(jsonReader, listType);
                 noteList = Arrays.asList(notes);
-                Log.d("СМОТРИ СЮДА", "список: " + notes.toString());
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
             }
