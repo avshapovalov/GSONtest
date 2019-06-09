@@ -3,19 +3,18 @@ package com.example.myapplication;
 import com.google.gson.annotations.SerializedName;
 
 public class Note {
-
-    @SerializedName("name")
-    private String noteTitle;
-    @SerializedName("description")
-    private String noteDescription;
-    @SerializedName("deadline")
-    private String noteTime;
     @SerializedName("creationDate")
     private Long creationDate;
     @SerializedName("changeDate")
     private Long changeDate;
     @SerializedName("isDeadlineNeeded")
     private Boolean isDeadlineNeeded;
+    @SerializedName("deadline")
+    private String noteTime;
+    @SerializedName("description")
+    private String noteDescription;
+    @SerializedName("name")
+    private String noteTitle;
 
     public Note() {
     }

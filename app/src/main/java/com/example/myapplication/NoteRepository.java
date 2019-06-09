@@ -2,6 +2,7 @@ package com.example.myapplication;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.util.JsonReader;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -25,6 +26,7 @@ import java.io.IOException;
 import java.io.Reader;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -50,38 +52,39 @@ public class NoteRepository {
     public void saveNote(Context context, Note note) {
         noteList = fillList(context);
         noteList.add(note);
-        Type listType = new TypeToken<ArrayList<Note>>(){}.getType();
+        Type listType = new TypeToken<ArrayList<Note>>() {
+        }.getType();
 
-        Gson gson = new GsonBuilder()
-                .setPrettyPrinting()
-                .create();
+        Gson gson = new Gson();
         String json = gson.toJson(noteList, listType);
         File file = new File(context.getFilesDir(), JSON_REPOSITORY_NAME);
         try {
-            gson.toJson(noteList, new FileWriter(file));
+            gson.toJson(json, new FileWriter(file));
         } catch (IOException e) {
             e.printStackTrace();
         }
+        Log.d("СМОТРИ СЮДА", json);
         Toast.makeText(context, "Заметка сохранена", Toast.LENGTH_SHORT).show();
     }
 
     public List<Note> fillList(Context context) {
-        Gson gson;
+        Gson gson = new Gson();
         File file = new File(context.getFilesDir(), JSON_REPOSITORY_NAME);
-        GsonBuilder gsonBuilder = new GsonBuilder()
-                .serializeNulls()
-                .setLenient()
-                .setLongSerializationPolicy(LongSerializationPolicy.STRING);
-        gson = gsonBuilder.create();
-
+        //GsonBuilder gsonBuilder = new GsonBuilder().setLenient();
+        Type listType = new TypeToken<List<Note>>() {
+        }.getType();
         if (file.exists()) {
-            try (Reader reader = new FileReader(file)) {
-                Type listType = new TypeToken<ArrayList<Note>>(){}.getType();
-                noteList = gson.fromJson(reader, listType);
-            } catch (IOException e) {
+            Log.d("СМОТРИ СЮДА", "Файл есть");
+            try {
+                Reader reader = new FileReader(file);
+                Note[] notes = gson.fromJson(reader, listType);
+                noteList = Arrays.asList(notes);
+                Log.d("СМОТРИ СЮДА", "список: " + notes.toString());
+            } catch (FileNotFoundException e) {
                 e.printStackTrace();
             }
         }
+
         return noteList;
     }
 
