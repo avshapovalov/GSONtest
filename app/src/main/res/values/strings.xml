@@ -1,0 +1,19 @@
+<resources>
+    <string name="app_name">Заметки</string>
+    <string name="save_pin">Сохранить Пин</string>
+    <string name="show_pin_hint">Пин-код</string>
+    <string name="enter_new_pin_text_view">Введите новый пин-код</string>
+    <string name="settings">Настройки</string>
+    <string name="descriptionExample">Description Example</string>
+    <string name="titleExample">Title Example</string>
+    <string name="timeExample">02.04.1990 21:12:00</string>
+    <string name="new_note">Новая заметка</string>
+    <string name="enter_the_title">Введите заголовок</string>
+    <string name="enter_description">Введите описание</string>
+    <string name="save_note">Сохранить заметку</string>
+    <string name="notes">Заметки</string>
+    <string name="dedline">Крайний срок</string>
+    <string name="sort">Сортировка</string>
+    <string name="descendingSort">По-убыванию</string>
+    <string name="ascendingSort">По-возрастанию</string>
+</resources>

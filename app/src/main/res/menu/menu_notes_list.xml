@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:yourapp="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/action_sort"
+        android:icon="@drawable/ic_sort_white_24dp"
+        android:title="@string/sort"
+        yourapp:showAsAction="always">
+        <menu>
+            <group android:checkableBehavior="single">
+                <item
+                    android:id="@+id/discending_sort"
+                    android:title="@string/descendingSort"
+                    android:titleCondensed="@string/descendingSort" />
+                <item
+                    android:id="@+id/ascending_sort"
+                    android:title="@string/ascendingSort"
+                    android:titleCondensed="@string/ascendingSort" />
+            </group>
+        </menu>
+    </item>
+</menu>
