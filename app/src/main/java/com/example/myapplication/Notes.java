@@ -82,8 +82,8 @@ public class Notes extends AppCompatActivity {
         noteList = noteRepository.fillList(Notes.this);
         notesView = (RecyclerView) findViewById(R.id.notes_recycler_view);
         notesView.setHasFixedSize(true);
-        Collections.sort(noteList, new NotesComparator());
-        Collections.reverse(noteList);
+        //Collections.sort(noteList, new NotesComparator());
+        //Collections.reverse(noteList);
         notesAdapter = new NotesAdapter(noteList);
         notesView.setAdapter(notesAdapter);
         layoutManager = new LinearLayoutManager(Notes.this);

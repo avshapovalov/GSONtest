@@ -9,6 +9,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.google.gson.LongSerializationPolicy;
+import com.google.gson.annotations.SerializedName;
 import com.google.gson.reflect.TypeToken;
 
 import org.json.JSONException;
@@ -40,6 +41,7 @@ public class NoteRepository {
     public static final String FIELD_CREATIONDATE = "creationDate";
     public static final String FIELD_CHANGEDATE = "changeDate";
     public static final String FIELD_IS_DEADLINE_NEEDED = "isDeadlineNeeded";
+    @SerializedName("noteList")
     private List<Note> noteList = new ArrayList<Note>();
 
     public NoteRepository() {
@@ -48,21 +50,15 @@ public class NoteRepository {
     public void saveNote(Context context, Note note) {
         noteList = fillList(context);
         noteList.add(note);
-        JSONObject noteObject = new JSONObject();
-        try {
-            noteObject.put(JSON_ARRAY, noteList);
+        Type listType = new TypeToken<ArrayList<Note>>(){}.getType();
 
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
+        Gson gson = new GsonBuilder()
+                .setPrettyPrinting()
+                .create();
+        String json = gson.toJson(noteList, listType);
         File file = new File(context.getFilesDir(), JSON_REPOSITORY_NAME);
-
-        FileWriter fileWriter;
         try {
-            fileWriter = new FileWriter(file, true);
-            BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
-            bufferedWriter.write(noteObject.toString() + "\n");
-            bufferedWriter.close();
+            gson.toJson(noteList, new FileWriter(file));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -70,26 +66,22 @@ public class NoteRepository {
     }
 
     public List<Note> fillList(Context context) {
-
-        Gson gson = new Gson();
+        Gson gson;
         File file = new File(context.getFilesDir(), JSON_REPOSITORY_NAME);
-        Note note = new Note();
         GsonBuilder gsonBuilder = new GsonBuilder()
                 .serializeNulls()
                 .setLenient()
-                .setLongSerializationPolicy(LongSerializationPolicy.STRING)
-                .setDateFormat("yyyy-MM-dd hh:mm:ss.S");
+                .setLongSerializationPolicy(LongSerializationPolicy.STRING);
         gson = gsonBuilder.create();
 
         if (file.exists()) {
             try (Reader reader = new FileReader(file)) {
                 Type listType = new TypeToken<ArrayList<Note>>(){}.getType();
-                noteList = new Gson().fromJson(reader, listType);
+                noteList = gson.fromJson(reader, listType);
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
-        Toast.makeText(context, "Заметка получена" + note.getNoteTitle(), Toast.LENGTH_SHORT).show();
         return noteList;
     }
 
