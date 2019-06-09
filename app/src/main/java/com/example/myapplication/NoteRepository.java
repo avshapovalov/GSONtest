@@ -82,6 +82,7 @@ public class NoteRepository {
         if (file.exists()) {
             try (Reader reader = new FileReader(file)) {
                 note = gson.fromJson(reader, Note.class);
+                noteList.add(note);
             } catch (IOException e) {
                 e.printStackTrace();
             }

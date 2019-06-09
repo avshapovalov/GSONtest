@@ -1,19 +1,20 @@
 package com.example.myapplication;
 
-import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
 
 public class Note {
-    @Expose
+
+    @SerializedName("name")
     private String noteTitle;
-    @Expose
+    @SerializedName("description")
     private String noteDescription;
-    @Expose
+    @SerializedName("deadline")
     private String noteTime;
-    @Expose
+    @SerializedName("creationDate")
     private Long creationDate;
-    @Expose
+    @SerializedName("changeDate")
     private Long changeDate;
-    @Expose
+    @SerializedName("isDeadlineNeeded")
     private Boolean isDeadlineNeeded;
 
     public Note() {
