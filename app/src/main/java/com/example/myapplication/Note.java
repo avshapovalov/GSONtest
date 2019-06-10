@@ -1,20 +1,16 @@
 package com.example.myapplication;
 
-import com.google.gson.annotations.SerializedName;
+import android.os.Parcel;
+import android.os.Parcelable;
 
-public class Note {
-    @SerializedName("creationDate")
-    private Long creationDate;
-    @SerializedName("changeDate")
-    private Long changeDate;
-    @SerializedName("isDeadlineNeeded")
-    private Boolean isDeadlineNeeded;
-    @SerializedName("deadline")
-    private String noteTime;
-    @SerializedName("description")
-    private String noteDescription;
-    @SerializedName("name")
+public class Note implements Parcelable {
+
     private String noteTitle;
+    private String noteDescription;
+    private String noteTime;
+    private Long creationDate;
+    private Long changeDate;
+    private Boolean isDeadlineNeeded;
 
     public Note() {
     }
@@ -26,6 +22,15 @@ public class Note {
         this.creationDate = creationDate;
         this.changeDate = changeDate;
         this.isDeadlineNeeded = isDeadlineNeeded;
+    }
+
+    public Note(Parcel in) {
+        this.noteTitle = in.readString();
+        this.noteDescription = in.readString();
+        this.noteTime = in.readString();
+        this.creationDate = in.readLong();
+        this.changeDate = in.readLong();
+        this.isDeadlineNeeded = Boolean.parseBoolean(in.readString());
     }
 
     public String getNoteTitle() {
@@ -87,4 +92,32 @@ public class Note {
                 ", isDeadlineNeeded=" + isDeadlineNeeded +
                 ']';
     }
+
+    @Override
+    public void writeToParcel(Parcel parcel, int flags) {
+        parcel.writeString(this.noteTitle);
+        parcel.writeString(this.noteDescription);
+        parcel.writeString(this.noteTime);
+        parcel.writeLong(this.creationDate);
+        parcel.writeLong(this.changeDate);
+        parcel.writeString(String.valueOf(this.isDeadlineNeeded));
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    public static final Parcelable.Creator<Note> CREATOR = new Parcelable.Creator<Note>() {
+
+        @Override
+        public Note createFromParcel(Parcel source) {
+            return new Note(source);
+        }
+
+        @Override
+        public Note[] newArray(int size) {
+            return new Note[size];
+        }
+    };
 }

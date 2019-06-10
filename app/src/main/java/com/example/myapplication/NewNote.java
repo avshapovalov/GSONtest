@@ -29,14 +29,12 @@ public class NewNote extends AppCompatActivity {
     private Toolbar createNoteToolbar;
     private Note newNote;
     private Calendar myCalendar;
-    private DatePickerDialog.OnDateSetListener date;
     private int DIALOG_DATE = 1;
     private int year;
     private int monthOfYear;
     private int dayOfMonth;
     public static final String NOTE_ID = "NOTE_ID";
     private int actionType = 0;
-    private String noteID;
     private NoteRepository newNoteRepository;
 
     @Override
@@ -50,11 +48,11 @@ public class NewNote extends AppCompatActivity {
         pickDeadlineButton = (ImageButton) findViewById(R.id.date_deadline_picker);
         isDeadlineNeeded = (CheckBox) findViewById(R.id.cbx_dedline_needed);
 
-        if (getIntent().getStringExtra(NOTE_ID) != null) {
+        if (getIntent().hasExtra(NOTE_ID)){
+            newNote = getIntent().getParcelableExtra(NOTE_ID);
             actionType = 1;
             newNoteRepository = new NoteRepository();
-            noteID = getIntent().getStringExtra(NOTE_ID);
-            newNote = newNoteRepository.getNote(NewNote.this, noteID);
+            newNote = getIntent().getParcelableExtra(NOTE_ID);
             newNoteTitle.setText(newNote.getNoteTitle());
             newNoteDescription.setText(newNote.getNoteDescription());
             newNoteDeadline.setText(String.valueOf(newNote.getNoteTime()));

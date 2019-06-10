@@ -2,33 +2,11 @@ package com.example.myapplication;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.util.Log;
 import android.widget.Toast;
-
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonObject;
-import com.google.gson.LongSerializationPolicy;
-import com.google.gson.annotations.SerializedName;
 import com.google.gson.reflect.TypeToken;
-import com.google.gson.stream.JsonReader;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.Reader;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 
 import static android.content.Context.MODE_PRIVATE;
@@ -36,15 +14,9 @@ import static android.content.Context.MODE_PRIVATE;
 public class NoteRepository {
     public static final int ACTION_NEW_NOTE = 0;
     public static final int ACTION_UPDATE = 1;
-    public static final String JSON_REPOSITORY_NAME = "noteRepository.json";
-    public static final String JSON_ARRAY = "noteRepository";
-    public static final String FIELD_TITLE = "name";
-    public static final String FIELD_DESCRIPTION = "description";
-    public static final String FIELD_DEADLINE = "deadline";
-    public static final String FIELD_CREATIONDATE = "creationDate";
-    public static final String FIELD_CHANGEDATE = "changeDate";
-    public static final String FIELD_IS_DEADLINE_NEEDED = "isDeadlineNeeded";
-    @SerializedName("noteList")
+    public static final String TAG = "СМОТРИ СЮДА";
+    public static final String JSON_REPOSITORY_NAME = "noteRepository";
+    public static final String JSON_REPOSITORY_KEY = "noteRepository";
     private List<Note> noteList = new ArrayList<Note>();
 
     public NoteRepository() {
@@ -53,98 +25,64 @@ public class NoteRepository {
     public void saveNote(Context context, Note note) {
         noteList = fillList(context);
         noteList.add(note);
-        noteList.add(new Note("Тест", "тест", "02.04.1990", Calendar.getInstance().getTimeInMillis(),Calendar.getInstance().getTimeInMillis(), false));
-        noteList.add(new Note("Тест2", "тест2", "20.09.2019", Calendar.getInstance().getTimeInMillis(),Calendar.getInstance().getTimeInMillis(), true));
-        Type listType = new TypeToken<ArrayList<Note>>() {
-        }.getType();
-
+        SharedPreferences sharedPreferences = context.getSharedPreferences(JSON_REPOSITORY_NAME, MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
         Gson gson = new Gson();
-        String json = gson.toJson(noteList, listType);
-        File file = new File(context.getFilesDir(), JSON_REPOSITORY_NAME);
-        try {
-            gson.toJson(json, new FileWriter(file));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        String json = gson.toJson(noteList);
+        editor.putString(JSON_REPOSITORY_KEY, json);
+        editor.commit();
         Toast.makeText(context, "Заметка сохранена", Toast.LENGTH_SHORT).show();
     }
 
     public List<Note> fillList(Context context) {
         Gson gson = new Gson();
-        File file = new File(context.getFilesDir(), JSON_REPOSITORY_NAME);
-        //GsonBuilder gsonBuilder = new GsonBuilder().setLenient();
-        Type listType = new TypeToken<List<Note>>() {
+        SharedPreferences sharedPref = context.getSharedPreferences(JSON_REPOSITORY_NAME, Context.MODE_PRIVATE);
+        String jsonPreferences = sharedPref.getString(JSON_REPOSITORY_KEY, "");
+        Type type = new TypeToken<List<Note>>() {
         }.getType();
-        if (file.exists()) {
-            try {
-                FileReader fileReader = new FileReader(file);
-                JsonReader jsonReader = new JsonReader(fileReader);
-                Note[] notes = gson.fromJson(jsonReader, listType);
-                noteList = Arrays.asList(notes);
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            }
+        try {
+            noteList = gson.fromJson(jsonPreferences, type);
+        } catch (NullPointerException e) {
+            noteList = new ArrayList<Note>();
         }
-
         return noteList;
     }
 
 
     public void deleteNote(Context mContext, Note note) {
-        File dir = new File(mContext.getFilesDir().getParent() + "/shared_prefs/");
-        String[] children = dir.list();
-
-        for (int i = 0; i < children.length; i++) {
-            if (mContext.getSharedPreferences(children[i].replace(".xml", ""),
-                    Context.MODE_PRIVATE).contains(String.valueOf(note.getCreationDate()))) {
-                mContext.getSharedPreferences(children[i].replace(".xml", ""), Context.MODE_PRIVATE).edit().clear().commit();
+        noteList = fillList(mContext);
+        for (int i = 0; i < noteList.size(); i++) {
+            if (noteList.get(i).getCreationDate().equals(note.getCreationDate())) {
+                noteList.remove(i);
             }
         }
-        for (int i = 0; i < children.length; i++) {
-            if (new File(dir, children[i]).getName().equals(note.getCreationDate() + ".xml")) {
-                new File(dir, children[i]).delete();
-            }
-        }
-    }
-
-    public Note getNote(Context noteEditContext, String noteID) {
-        File dir = new File(noteEditContext.getFilesDir().getParent() + "/shared_prefs/");
-        String[] children = dir.list();
-        Note note = new Note();
-        for (int i = 0; i < children.length; i++) {
-            if (noteEditContext.getSharedPreferences(children[i].replace(".xml", ""),
-                    Context.MODE_PRIVATE).getLong(NoteRepository.FIELD_CREATIONDATE, 0) == Long.parseLong(noteID)) {
-                SharedPreferences sharedPref = noteEditContext.getSharedPreferences(children[i].replace(".xml", ""), Context.MODE_PRIVATE);
-                note.setNoteTitle(sharedPref.getString(NoteRepository.FIELD_TITLE, "Unknown"));
-                note.setNoteDescription(sharedPref.getString(NoteRepository.FIELD_DESCRIPTION, ""));
-                note.setNoteTime(sharedPref.getString(NoteRepository.FIELD_DEADLINE, ""));
-                note.setCreationDate(sharedPref.getLong(NoteRepository.FIELD_CREATIONDATE, 0));
-                note.setChangeDate(sharedPref.getLong(NoteRepository.FIELD_CHANGEDATE, 0));
-                note.setDeadlineNeeded(sharedPref.getBoolean(NoteRepository.FIELD_IS_DEADLINE_NEEDED, false));
-            }
-        }
-        return note;
+        SharedPreferences sharedPreferences = mContext.getSharedPreferences(JSON_REPOSITORY_NAME, MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        Gson gson = new Gson();
+        String json = gson.toJson(noteList);
+        editor.putString(JSON_REPOSITORY_KEY, json);
+        editor.commit();
+        Toast.makeText(mContext, "Заметка удалена", Toast.LENGTH_SHORT).show();
     }
 
     public void updateNote(Context noteEditContext, Note note) {
-        File dir = new File(noteEditContext.getFilesDir().getParent() + "/shared_prefs/");
-        String[] children = dir.list();
-        for (int i = 0; i < children.length; i++) {
-            if (noteEditContext.getSharedPreferences(children[i].replace(".xml", ""),
-                    Context.MODE_PRIVATE).getLong(NoteRepository.FIELD_CREATIONDATE, 0) == note.getCreationDate()) {
-                SharedPreferences sharedPref = noteEditContext.getSharedPreferences(children[i].replace(".xml", ""), Context.MODE_PRIVATE);
-                SharedPreferences.Editor editor = sharedPref.edit();
-                editor.clear();
-                editor.putString(NoteRepository.FIELD_TITLE, note.getNoteTitle());
-                editor.putString(NoteRepository.FIELD_DESCRIPTION, note.getNoteDescription());
-                editor.putString(NoteRepository.FIELD_DEADLINE, note.getNoteTime());
-                editor.putLong(NoteRepository.FIELD_CREATIONDATE, note.getCreationDate());
-                editor.putLong(NoteRepository.FIELD_CHANGEDATE, note.getChangeDate());
-                editor.putBoolean(NoteRepository.FIELD_IS_DEADLINE_NEEDED, note.getDeadlineNeeded());
-                editor.apply();
-                Toast.makeText(noteEditContext, "Заметка обновлена", Toast.LENGTH_SHORT).show();
+        noteList = fillList(noteEditContext);
+        SharedPreferences sharedPreferences = noteEditContext.getSharedPreferences(JSON_REPOSITORY_NAME, MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        for (int i = 0; i < noteList.size(); i++) {
+            if (noteList.get(i).getCreationDate().equals(note.getCreationDate())) {
+                noteList.get(i).setNoteTitle(note.getNoteTitle());
+                noteList.get(i).setNoteDescription(note.getNoteDescription());
+                noteList.get(i).setNoteTime(note.getNoteTime());
+                noteList.get(i).setChangeDate(note.getChangeDate());
+                noteList.get(i).setDeadlineNeeded(note.getDeadlineNeeded());
             }
         }
+        Gson gson = new Gson();
+        String json = gson.toJson(noteList);
+        editor.putString(JSON_REPOSITORY_KEY, json);
+        editor.commit();
+        Toast.makeText(noteEditContext, "Заметка обновлена", Toast.LENGTH_SHORT).show();
     }
 
 

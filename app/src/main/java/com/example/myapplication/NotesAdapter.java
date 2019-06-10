@@ -95,7 +95,7 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NotesViewHol
             public void onClick(View v) {
                 note = notesList.get(position);
                 Intent intent = new Intent(mContext, NewNote.class);
-                intent.putExtra(NewNote.NOTE_ID, String.valueOf(note.getCreationDate()));
+                intent.putExtra(NewNote.NOTE_ID, note);
                 mContext.startActivity(intent);
             }
         });
@@ -103,7 +103,12 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NotesViewHol
 
     @Override
     public int getItemCount() {
-        return notesList.size();
+        try {
+            return notesList.size();
+        }catch (NullPointerException e){
+
+        }
+        return 0;
     }
 
     private void setLevelColor(NotesViewHolder holder) {
@@ -123,6 +128,10 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NotesViewHol
             }
 
         } catch (ParseException e) {
+            holder.priorityLevel.setBackgroundColor(Color.parseColor("#258E04"));
+            e.printStackTrace();
+        }
+        catch (NullPointerException e) {
             holder.priorityLevel.setBackgroundColor(Color.parseColor("#258E04"));
             e.printStackTrace();
         }
